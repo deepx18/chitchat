@@ -8,7 +8,8 @@ const initialState = {
     email: "",
   },
   chats: [],
-  currentChatOpened: 'room_1_4'
+  messages: [],
+  currentChatOpened: null
 };
 
 const userSlice = createSlice({
@@ -26,9 +27,18 @@ const userSlice = createSlice({
     },
     initChats: (state, payload) => {
       state.chats = payload.payload
+    },
+    changeOpenedChat: (state, payload) => {
+      state.currentChatOpened = payload.payload
+    },
+    initMessages: (state, payload) => {
+      state.messages = payload.payload
+    },
+    updateMessages: (state, payload) => {
+      state.messages = [...state.messages, payload.payload]
     }
   },
 });
 
-export const { initUser, initChats } = userSlice.actions;
+export const { initUser, initChats, changeOpenedChat, initMessages, updateMessages } = userSlice.actions;
 export default userSlice.reducer;

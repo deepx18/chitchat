@@ -44,6 +44,7 @@ export const {
   useGetChatsByUserIdQuery,
   useGetUserByIdQuery,
   useGetMessagesByRoomIdQuery,
+  useLazyGetMessagesByRoomIdQuery,
   useLazyGetUserByEmailQuery,
   usePostMessageMutation,
   usePostChatMutation

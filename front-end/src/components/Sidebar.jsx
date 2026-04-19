@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ApiHandler from "../classes/ApiHandler";
 import { useGetChatsByUserIdQuery } from "../redux/apiService";
-import { initChats } from "../redux/userSlice";
+import { changeOpenedChat, initChats } from "../redux/userSlice";
 
-export default function Sidebar({ setState }) {
+export default function Sidebar({ setState, setChatOpened }) {
   // const [chats, setChats] = useState([]);
   const currentUser = useSelector((state) => state.user.currentUser);
   const currentChatOpened = useSelector(
@@ -29,7 +29,9 @@ export default function Sidebar({ setState }) {
 
   const openChat = (chat) => {
     console.log("fair and square");
-    
+    setChatOpened(true)
+
+    dispatch(changeOpenedChat(chat.room_id))
   }
 
   return (
