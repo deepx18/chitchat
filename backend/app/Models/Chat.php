@@ -11,7 +11,8 @@ class Chat extends Model
 
     protected $fillable = [
         'room_id',
-        'users'
+        'firstUser',
+        'secondUser',
     ];
 
     protected $casts = [
@@ -21,11 +22,11 @@ class Chat extends Model
     // Optional: Ensure we always store exactly 2 users
     public function setUsersAttribute($value)
     {
-        if (is_array($value) && count($value) === 2) {
-            $this->attributes['users'] = json_encode(array_values($value));
-        } else {
-            throw new \InvalidArgumentException("A chat must have exactly 2 users.");
-        }
+        // if (is_array($value) && count($value) === 2) {
+        //     $this->attributes['users'] = json_encode(array_values($value));
+        // } else {
+        //     throw new \InvalidArgumentException("A chat must have exactly 2 users.");
+        // }
     }
 
 }

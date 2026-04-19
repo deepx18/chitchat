@@ -7,7 +7,8 @@ const initialState = {
     name: "",
     email: "",
   },
-  chats: []
+  chats: [],
+  currentChatOpened: 'room_1_4'
 };
 
 const userSlice = createSlice({
@@ -25,7 +26,7 @@ const userSlice = createSlice({
     },
     initChats: (state, payload) => {
       state.chats = payload.payload
-    } 
+    }
   },
 });
 

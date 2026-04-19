@@ -32,7 +32,8 @@ class ChatSeeder extends Seeder
             // OR if it already exists in the database
             if (!in_array($roomId, $createdPairs) && !Chat::where('room_id', $roomId)->exists()) {
                 Chat::factory()->create([
-                    'users' => $pair,
+                    'firstUser' => $pair[0],
+                    'secondUser' => $pair[1],
                     'room_id' => $roomId
                 ]);
                 

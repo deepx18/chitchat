@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use Illuminate\Http\Request;
@@ -13,7 +15,31 @@ class ChatsController extends Controller
      */
     public function index(Request $request)
     {
-        $chats = Chat::whereJsonContains('users', (int)$request->query('user_id'))->get();
+
+
+
+        $searchTerm = $request->query('user_id');
+
+        $results = DB::table('chats')
+            ->select('id', 'room_id')
+            ->addSelect(DB::raw("
+                CASE 
+                    WHEN firstUser = '$searchTerm' THEN secondUser
+                    WHEN secondUser = '$searchTerm' THEN firstUser
+                    ELSE 'none'
+                END as user_id
+            "))
+            ->where('firstUser', $searchTerm)
+            ->orWhere('secondUser', $searchTerm);
+
+
+        $chats = DB::table('users')
+            ->joinSub($results, 'matched_chats', function ($join) {
+                $join->on('matched_chats.user_id', '=', 'users.id');
+            })
+            ->get();
+
+        // $chats = Chat::where('users', (int)$request->query('user_id'))->get();
         return response()->json($chats);
     }
 
@@ -29,10 +55,8 @@ class ChatsController extends Controller
 
         $chat = new Chat();
         $chat->room_id = 'user_' . $validated['user_1'] . '_' . $validated['user_2'];
-        $chat->users = [
-            $validated['user_1'],
-            $validated['user_2']
-        ];
+        $chat->firstUser = $validated['user_1'];
+        $chat->secondUser = $validated['user_2'];
 
         $chat->save();
 

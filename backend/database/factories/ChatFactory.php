@@ -12,7 +12,7 @@ class ChatFactory extends Factory
         return [
             'room_id' => 'chat_' . $this->faker->unique()->numberBetween(1000, 9999),
             // Defaulting to two IDs; the Seeder will inject real ones
-            'users' => [1, 2], 
+            // 'users' => [1, 2], 
             'created_at' => now(),
             'updated_at' => now(),
         ];

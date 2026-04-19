@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
             $table->string('room_id')->unique();
-            $table->json('users');
+            $table->foreignId('firstUser')->constrained('users');
+            $table->foreignId('secondUser')->constrained('users');
             $table->timestamps();
         });
     }

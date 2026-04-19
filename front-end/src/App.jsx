@@ -1,104 +1,83 @@
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import MsgLeft from "./components/MsgLeft";
+import MsgLeft from "./components/MsgLeft"
 import "./App.css";
 import { socket } from "./socket";
 import { useEffect, useState } from "react";
 import ApiHandler from "./classes/ApiHandler";
 import { useDispatch, useSelector } from "react-redux";
-import { initChats, initUser } from "./redux/userSlice";
-import { useGetChatsByUserIdQuery, useGetUserByIdQuery } from "./redux/apiService";
+import { initUser } from "./redux/userSlice";
+import { useGetUserByIdQuery, usePostMessageMutation } from "./redux/apiService";
+import NewConv from "./components/NewConv";
 
 function App() {
   const [messages, setMessages] = useState([]);
-  // const [user, setUser] = useState({});
-  const {
-    data: user,
-    error: userError,
-    isLoading: isUserLoading,
-  } = useGetUserByIdQuery(4);
+  const [addNewConv, setAddNewConv] = useState(false);
+  const [user, setUser] = useState({});
+  const currentChatOpened = useSelector((state) => state.user.currentChatOpened)
+  const { data, error, isLoading: isUsersLoading } = useGetUserByIdQuery(4);
+  const [postMessage, { isLoading: isMessagePLoading }] = usePostMessageMutation();
+  const currentUser = useSelector((state) => state.user.currentUser)
+  const dispatch = useDispatch()
 
-  const {
-    data: chats,
-    error: chatsError,
-    isLoading: isChatsLoading,
-  } = useGetChatsByUserIdQuery(user?.user_id, {
-    skip: !user?.id, // 👈 Only runs once we have chats
-  });
 
-  const userState = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-  const room_id = "global";
 
   useEffect(() => {
-    socket.emit("join", room_id);
+    socket.emit("join", currentChatOpened);
 
-    // ApiHandler.getUser(4).then((data) => {
-    //   setUser(data)
-    // })
-
-    ApiHandler.getMessages("room_1_4", setMessages);
+    ApiHandler.getMessages('room_1_4', setMessages);
 
     socket.on("receive_message", (data) => {
       setMessages((prev) => [...prev, data]);
     });
-
+    
     return () => {
       socket.off("receive_message");
     };
   }, []);
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
+  const handleSendMessage = async (e) => {
+    e.preventDefault()
     const msgData = {
       room_id,
       msg: e.target[1].value,
       user_id: 1,
       time: new Date().toLocaleTimeString(),
     };
+    // ApiHandler.postMessage(msgData);
 
-    ApiHandler.postMessage(msgData);
+
+    await postMessage(msgData);
 
     socket.emit("send_message", msgData);
     setMessages((prev) => [...prev, msgData]);
-    e.target[1].value = "";
+    e.target[1].value = ""
   };
 
   useEffect(() => {
     console.log(messages);
-  }, [messages]);
+  }, [messages])
 
   useEffect(() => {
-    if (!isUserLoading) dispatch(initUser(user));
-  }, [isUserLoading]);
+    if (!isUsersLoading) dispatch(initUser(data))
+  }, [isUsersLoading])
   
-  useEffect(() => {
-    if (!isChatsLoading) {dispatch(initChats(chats)); console.log(chats);
-    };
-    // console.log(isChatsLoading);
-    
-  }, [isChatsLoading]);
-
   return (
     <div className="bg-surface text-on-background selection:bg-tertiary/20">
       <div className="flex h-screen w-full overflow-hidden">
-        <Sidebar />
+        <Sidebar setState={setAddNewConv} />
         <main className="ml-80 flex-1 flex flex-col bg-surface overflow-hidden relative">
           <Header />
           <div className="flex-1 overflow-y-auto px-12 py-8 space-y-12 max-w-4xl mx-auto w-full">
-            {messages.map((element, i) => (
-              <MsgLeft
-                time={element.time}
-                sender={element.user_id}
-                msg={element.msg}
-                key={element.id}
-              />
-            ))}
+            {
+              messages.map((element, i) => <MsgLeft time={element.time} sender={element.user_id} msg={element.msg} key={element.id} />)
+            }
           </div>
           <Footer handler={handleSendMessage} />
         </main>
       </div>
+      {addNewConv && <NewConv setState={setAddNewConv} />}
     </div>
   );
 }

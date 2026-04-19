@@ -11,9 +11,11 @@ class UsersController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $user = User::where('email', $request->query('email'))->first();
+
+        return response()->json($user);
     }
 
     /**
