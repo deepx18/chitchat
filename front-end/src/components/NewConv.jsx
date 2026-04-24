@@ -46,6 +46,8 @@ export default function NewConv({ setState }) {
         user_1: currentUser.user_id,
         user_2: id
     })
+
+    
     
     setState(false)
   }

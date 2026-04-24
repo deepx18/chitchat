@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Header() {
   return (
-    <header className="flex justify-between items-center w-full px-10 h-20 sticky top-0 z-10 bg-[#fff8f8]/80 backdrop-blur-md">
+    <header className="flex justify-between items-center w-full px-10 h-20 absolute top-0 z-10 bg-white/10 backdrop-blur-md">
       <div className="flex items-center space-x-6">
         <div className="flex flex-col">
           <h2 className="font-manrope text-2xl font-bold tracking-tighter text-on-surface">
@@ -16,7 +16,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
+      {/* <div className="flex items-center space-x-4">
         <div className="flex items-center bg-surface-container-high px-4 py-2 rounded-full">
           <span
             className="material-symbols-outlined text-sm mr-2 text-on-surface-variant"
@@ -38,7 +38,7 @@ export default function Header() {
             more_vert
           </span>
         </button>
-      </div>
+      </div> */}
     </header>
   );
 }

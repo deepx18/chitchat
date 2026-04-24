@@ -8,11 +8,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { initMessages, initUser, updateMessages } from "../redux/userSlice";
 import {
   useGetUserByIdQuery,
+  useLazyGetAuthenticatedUserQuery,
   useLazyGetMessagesByRoomIdQuery,
   usePostMessageMutation,
 } from "../redux/apiService";
 import NewConv from "../components/NewConv";
 import Chat from "../components/Chat";
+import { useNavigate } from "react-router";
 
 function Main() {
   const [addNewConv, setAddNewConv] = useState(false);
@@ -23,19 +25,30 @@ function Main() {
     (state) => state.user.currentChatOpened,
   );
   const { data, error, isLoading: isUsersLoading } = useGetUserByIdQuery(4);
-  const messages = useSelector((state) => state.user.messages)
+  const messages = useSelector((state) => state.user.messages);
   const [
     getMessages,
     { data: initialMessages, isFetching, isError, error: messsagesError },
   ] = useLazyGetMessagesByRoomIdQuery();
+  const [getAuthenticatedUser, { isLoading: isUserLoading }] =
+    useLazyGetAuthenticatedUserQuery();
+
 
   const [postMessage, { isLoading: isMessagePLoading }] =
     usePostMessageMutation();
   const currentUser = useSelector((state) => state.user.currentUser);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
+    getAuthenticatedUser().then((res) => {
+      if (res.isSuccess) dispatch(initUser(res.data.data));
+      else navigate("/login");
+    });
+
     socket.on("receive_message", (data) => {
+      console.log(data);
+      
       dispatch(updateMessages(data));
     });
 
@@ -50,12 +63,13 @@ function Main() {
       room_id: currentChatOpened,
       msg: e.target[1].value,
       user_id: currentUser.user_id,
+      name: currentUser.name,
       time: new Date().toLocaleTimeString(),
     };
 
+    socket.emit("send_message", msgData);
     const { data } = await postMessage(msgData);
 
-    socket.emit("send_message", data);
     e.target[1].value = "";
   };
 
@@ -73,8 +87,10 @@ function Main() {
   }, [currentChatOpened]);
 
   useEffect(() => {
-    dispatch(initMessages(initialMessages))
-  }, [initialMessages])
+    dispatch(initMessages(initialMessages));
+  }, [initialMessages]);
+
+  if (isUserLoading) return <></>;
 
   return (
     <div className="bg-surface text-on-background selection:bg-tertiary/20">

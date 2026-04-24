@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MessagesController extends Controller
 {
@@ -15,7 +16,18 @@ class MessagesController extends Controller
     {
         $messages = Message::where('room_id', $request->query('room_id'))->get();
 
-        return response()->json($messages);
+        $results = DB::table('messages')
+            ->select('id', 'room_id', 'user_id', 'msg', 'time')
+            ->where('room_id', $request->query('room_id'));
+
+
+        $chats = DB::table('users')
+            ->joinSub($results, 'matched_messages', function ($join) {
+                $join->on('matched_messages.user_id', '=', 'users.id');
+            })
+            ->get();
+
+        return response()->json($chats);
     }
 
     /**
@@ -37,7 +49,8 @@ class MessagesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id) {
+    public function show(string $id)
+    {
         $message = Message::findOrFail($id);
 
         return response()->json($message);

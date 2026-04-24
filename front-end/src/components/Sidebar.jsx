@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ApiHandler from "../classes/ApiHandler";
-import { useGetChatsByUserIdQuery } from "../redux/apiService";
+import {
+  useGetChatsByUserIdQuery,
+  useLazyGetChatsByUserIdQuery,
+  useLogoutMutation,
+} from "../redux/apiService";
 import { changeOpenedChat, initChats } from "../redux/userSlice";
+import { useNavigate } from "react-router";
 
 export default function Sidebar({ setState, setChatOpened }) {
   // const [chats, setChats] = useState([]);
@@ -11,6 +16,7 @@ export default function Sidebar({ setState, setChatOpened }) {
     (state) => state.user.currentChatOpened,
   );
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     data: chats,
     error,
@@ -18,21 +24,26 @@ export default function Sidebar({ setState, setChatOpened }) {
   } = useGetChatsByUserIdQuery(currentUser.user_id, {
     skip: !currentUser.user_id,
   });
+  const [getChatsByUserId, { isLoading: isChatsLoading }] =
+    useLazyGetChatsByUserIdQuery();
+  const [postLogout, { isLoading: _ }] = useLogoutMutation();
 
   useEffect(() => {
     if (!isLoading && chats) dispatch(initChats(chats));
   }, [chats]);
 
-  // useEffect(() => {
-  //   console.log(chats);
-  // }, [chats])
-
   const openChat = (chat) => {
     console.log("fair and square");
-    setChatOpened(true)
+    setChatOpened(true);
 
-    dispatch(changeOpenedChat(chat.room_id))
-  }
+    dispatch(changeOpenedChat(chat.room_id));
+  };
+
+  const logout = async (e) => {
+    e.preventDefault();
+    console.log(await postLogout());
+    navigate("/login");
+  };
 
   return (
     <aside className="h-screen w-80 fixed left-0 top-0 bg-[#f9f2f2] dark:bg-stone-900 flex flex-col py-8 px-6 space-y-6 z-20">
@@ -110,6 +121,14 @@ export default function Sidebar({ setState, setChatOpened }) {
             </span>
           </div>
         </div>
+        <form onSubmit={logout} className="my-2">
+          <button
+            className="w-full bg-primary py-3 rounded-lg text-on-primary font-manrope font-bold text-sm hover:bg-primary-dim transition-all active:scale-95"
+            type="submit"
+          >
+            Logout
+          </button>
+        </form>
       </div>
     </aside>
   );
