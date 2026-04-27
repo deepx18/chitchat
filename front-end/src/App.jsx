@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Main from "./pages/Main";
 import LogIn from "./pages/LogIn";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 export default function App() {
   // useEffect(() => {

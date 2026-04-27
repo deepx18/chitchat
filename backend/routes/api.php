@@ -16,4 +16,4 @@ Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'getAuth
 
 Route::apiResource('messages', MessagesController::class)->except(['update']);
 Route::apiResource('chats', ChatsController::class)->except(['show', 'update', 'destroy']);
-Route::apiResource('users', UsersController::class)->except(['update']);
+Route::apiResource('users', UsersController::class)->except(['store', 'update', 'update']);
